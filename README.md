@@ -1,5 +1,5 @@
 # Condor.Club FTR & IGC Downloader
-A small utility to simplify downloading IGC and FTR tracks from Condor.Club
+A small utility to simplify downloading multiple IGC and FTR tracks from Condor.Club
 
 This was created with AutoHotKey, you can copy/download the AHK file above, or if you don't have AHK, there is an exe version in releases.
 
