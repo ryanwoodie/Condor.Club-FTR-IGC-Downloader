@@ -1,7 +1,7 @@
 # Condor.Club FTR & IGC Downloader
 A small utility to simplify downloading multiple IGC and FTR tracks from Condor.Club
 
-This was created with AutoHotKey, you can copy/download the AHK file above, or if you don't have AHK, there is an exe version in releases.
+This was created with AutoHotKey, you can copy/download the AHK file above, or if you don't have AHK, there is an exe version in [releases](https://github.com/ryanwoodie/Condor.Club-FTR-IGC-Downloader/releases).
 
 To download all available IGC and FTR files from a Condor.Club "race results" page, you can either copy (Ctrl+C) the page URL or highlight rows in the race results table and copy (Ctrl+C) to download only the selected rows. If the URL copy doesn't work, try select all (Ctrl+A) then copy (Ctrl+C).
 
