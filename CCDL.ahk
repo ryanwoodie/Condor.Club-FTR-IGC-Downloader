@@ -1,4 +1,4 @@
-#warn
+;#warn
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #SingleInstance, force
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
@@ -99,6 +99,7 @@ Loop, Files, *.zip
          filegetsize,size,%A_LoopFileName%",k
          if (size < 10 )
            {
+           FileDelete, %A_LoopFileName%
            time := A_Now
            run, %download_url%&rank=1&next=1
            sleep 1000
