@@ -3,6 +3,7 @@
 #SingleInstance, force
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
+
 global config := 0
 loadCCDLconfig()
 SetTimer, RemoveTooltip, 5000
@@ -92,14 +93,14 @@ ElapsedTime := A_TickCount - StartTime
 if (ElapsedTime > 20000)
      msgbox, If a track has finished downloading, but you get this message, please make sure that the folder that the tracks are being downloaded to is the same folder that is in the CCDLconfig.ini file, or delete CCDLconfig.ini to allow the setup to run again.
 local Files
-Loop, Files, *.zip
+Loop, Files, %DownloadFolder%\*.zip
   {
    if (A_LoopFileTimeCreated >= time)
          {
          filegetsize,size,%A_LoopFileName%",k
          if (size < 10 )
            {
-           FileDelete, %A_LoopFileName%
+           FileDelete, %DownloadFolder%\%A_LoopFileName%
            time := A_Now
            run, %download_url%&rank=1&next=1
            sleep 1000
@@ -107,7 +108,7 @@ Loop, Files, *.zip
     }
   }
 
-Loop, Files, *.zip
+Loop, Files, %DownloadFolder%\*.zip
 {
   if (A_LoopFileTimeCreated >= time)
     {
@@ -115,7 +116,7 @@ Loop, Files, *.zip
     time2 := A_Now
     Runwait, %7zip% x "%DownloadFolder%\%A_LoopFileName%" -o%IGCandFTRFolder% -y,,hide
     RegExMatch(A_LoopFileName,"(.*)(?=-.*-.*zip)",task)
-    FileDelete, %A_LoopFileName%
+    FileDelete, %DownloadFolder%\%A_LoopFileName%
     MakeFTR()
     }
   }
