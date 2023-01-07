@@ -1,4 +1,4 @@
-;#warn
+#warn
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #SingleInstance, force
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
@@ -13,12 +13,14 @@ start:
 loop
 {
 clipboard := ""
+longpause := 0
 global time := A_now
 global time2 := ""
+global sleeprandom := 0
 AllTracks := ""
 while (clipboard = "")
   {
-  ToolTip, Highlight and copy (ctrl+c) Condor.Club Race Result rows to start download. Ctrl+i to change settings. ESC to exit
+  ToolTip, Highlight`, or select all (ctrl+a)`, and copy (ctrl+c) Condor.Club Race Result rows to start download. Ctrl+i to change settings. ESC to exit
   sleep 100
   }
 
@@ -29,28 +31,37 @@ RegExMatch(clipboard,"http.*id=\K(\d*)",AllTracks)
     runwait https://www.condor.club/comp/besttimes/0/?id=%AllTracks%
     sleep 3000
     send ^a
-    sleep 100
+    sleep 1500
     send ^c
+    sleep 100
   }
 
 ClipboardGet_HTML( Data )
-Clipboard1 := RegExReplace(Data,"http\S*analysis\S*=", "¢",count)
-if  (count < 1)
+Clipboard1 := RegExReplace(Data,"http\S*analysis\S*res=", "¢",count)
+Clipboard2 := RegExReplace(Data,"http\S*analysis\S*rank=", "¢",count2)
+Clipboard1 := Clipboard1 . Clipboard2
+if  (count < 1) and (count2 < 1)
  {
- MsgBox, 4,, A track was not found in copied data. Click "yes" to try again. Click "no" to exit app. If you copied the Condor URL, try to select all (Ctrl+a) and copy (ctrl+c) on the results page instead.
+ MsgBox, 4,, A track was not found in copied data. Click "yes" and try again, or click "no" to exit app. If you copied the Condor URL, try to select all (Ctrl+a) and copy (ctrl+c) on the results page instead.
  IfMsgBox Yes
    goto start
    else
    exitapp
  }
 
-MsgBox, 4,, Copy the FTRs to your Condor FlightTrack folder (eg. to use as ghosts)?
+If (Count2 = 0)
+  count2 := ""
+if (Count = 0)
+  count := ""
+MsgBox, 4,, Ready to download %count%%count2% tracks. Would you also like to copy the FTRs to your Condor FlightTrack folder (eg. to use as ghosts)?
 IfMsgBox Yes
    global CopyFTR := 1
   else
    global CopyFTR :=
 if (SaveToSubfolder = "No")
   FileDelete,%IGCandFTRFolder%\SCITemp\*.igc
+
+
 
 Loop,parse,Clipboard1,¢
  {
@@ -59,13 +70,30 @@ Loop,parse,Clipboard1,¢
 if (Result > 1000) and (Result < 1000000)
 {
   ToolTip,Downloading %Result%.ftr
-  download_url := "https://www.condor.club/download2/0/?res=" . Result
-  run, %download_url%
-  sleep 3000
+  rank :=
+  if(count2 > 0)
+      rank := "&rank=1&next=1"
+  WinGetActiveTitle, OutputVar
+  download_url := "https://www.condor.club/download2/0/?res=" . Result . Rank
+  runwait, %download_url%,,HIDE
+  sleep 500
+  WinActivate, %OutputVar%
+  if (longpause++ = 20)
+    {
+      random,sleeprandom,30000,120000
+      longpause := 0
+    }
+    else
+      random,sleeprandom,% DownloadSleepMilliSeconds - 1000,% DownloadSleepMilliSeconds + 1000
+  sec := sleeprandom/1000
+  Tooltip, Taking a %sec% second pause on downloading (to avoid getting blocked by Condor.Club)
+  sleep %sleeprandom%
   unzip()
   time := A_Now
  }
  }
+
+
 
  MsgBox, 4,, Launch ShowCondorIGC and load tracks?
    IfMsgBox Yes
@@ -91,26 +119,15 @@ while (wait=0)
 {
 ElapsedTime := A_TickCount - StartTime
 if (ElapsedTime > 20000)
+    {
      msgbox, If a track has finished downloading, but you get this message, please make sure that the folder that the tracks are being downloaded to is the same folder that is in the CCDLconfig.ini file, or delete CCDLconfig.ini to allow the setup to run again.
+     StartTime := A_TickCount
+   }
 local Files
-Loop, Files, %DownloadFolder%\*.zip
-  {
-   if (A_LoopFileTimeCreated >= time)
-         {
-         filegetsize,size,%A_LoopFileName%",k
-         if (size < 10 )
-           {
-           FileDelete, %DownloadFolder%\%A_LoopFileName%
-           time := A_Now
-           run, %download_url%&rank=1&next=1
-           sleep 3000
-          }
-    }
-  }
-
+Files := ""
 Loop, Files, %DownloadFolder%\*.zip
 {
-  if (A_LoopFileTimeCreated > time)
+  if (A_LoopFileTimeCreated >= time)
     {
     Wait:=1
     time2 := A_Now
@@ -173,18 +190,18 @@ SetWorkingDir %A_ScriptDir%
 Return
 }
 
-     ClipboardGet_HTML( byref Data ) { ; www.autohotkey.com/forum/viewtopic.php?p=392624#392624
-      If CBID := DllCall( "RegisterClipboardFormat", Str,"HTML Format", UInt )
-       If DllCall( "IsClipboardFormatAvailable", UInt,CBID ) <> 0
-        If DllCall( "OpenClipboard", UInt,0 ) <> 0
-         If hData := DllCall( "GetClipboardData", UInt,CBID, UInt )
-            DataL := DllCall( "GlobalSize", UInt,hData, UInt )
-              , pData := DllCall( "GlobalLock", UInt,hData, UInt )
-          , Data := StrGet( pData, dataL, "UTF-8" )
-          , DllCall( "GlobalUnlock", UInt,hData )
-      DllCall( "CloseClipboard" )
-     Return dataL ? dataL : 0
-     }
+ClipboardGet_HTML( byref Data ) { ; www.autohotkey.com/forum/viewtopic.php?p=392624#392624
+If CBID := DllCall( "RegisterClipboardFormat", Str,"HTML Format", UInt )
+ If DllCall( "IsClipboardFormatAvailable", UInt,CBID ) <> 0
+  If DllCall( "OpenClipboard", UInt,0 ) <> 0
+   If hData := DllCall( "GetClipboardData", UInt,CBID, UInt )
+      DataL := DllCall( "GlobalSize", UInt,hData, UInt )
+        , pData := DllCall( "GlobalLock", UInt,hData, UInt )
+    , Data := StrGet( pData, dataL, "UTF-8" )
+    , DllCall( "GlobalUnlock", UInt,hData )
+DllCall( "CloseClipboard" )
+Return dataL ? dataL : 0
+}
 
 loadCCDLconfig()
 {
@@ -259,6 +276,14 @@ IniRead,FlightTracksFolder,CCDLconfig.ini,Settings,FlightTracksFolder,%A_space%
     if (errorlevel = 0)
     IniWrite %SCIexe%, CCDLconfig.ini,Settings,SCIexe
     }
+
+IniRead,DownloadSleepMilliSeconds,CCDLconfig.ini,Settings,DownloadSleepMilliSeconds,%A_space%
+  if (DownloadSleepMilliSeconds="")  or (config = 1)
+  {
+  InputBox, DownloadSleepMilliSeconds, Pause time (ms) between downloads, If Condor Club detects downloads happening too quickly it might block your IP address for 24 hours. Specify a longer pause time (in milliseconds) if you run into this issue. (default 3000) ,,,,,,,,3000
+  if (errorlevel = 0)
+  IniWrite %DownloadSleepMilliSeconds%, CCDLconfig.ini,Settings,DownloadSleepMilliSeconds
+  }
 
 config := 0
 }
