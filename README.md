@@ -5,7 +5,7 @@ This was created with AutoHotKey, you can copy/download the AHK file above, or i
 
 To download all available IGC and FTR files from a Condor.Club "race results" page, you can either copy (Ctrl+C) the page URL or highlight rows in the race results table and copy (Ctrl+C) to download only the selected rows. If the URL copy doesn't work, try select all (Ctrl+A) then copy (Ctrl+C).
 
-The IGC and FTR files will be saved to the folder specified in the CCDLconfig.ini file that is created when first run. You will also be given the option to save the FTR files to your Condor FlightTracks folder (for use as ghosts) and to load the IGC files in [ShowCondorIGC](https://virtualsoaring.eu/download#:~:text=showcondorigc%202.62c%20for%20c2) for analysis.
+The IGC and FTR files will be saved to the folder specified in the CCDLconfig.ini file that is created when first run. You will also be given the option to save the FTR files to your Condor FlightTracks folder (for use as ghosts) and to automatically load the IGC files in [ShowCondorIGC](https://virtualsoaring.eu/download#:~:text=showcondorigc%202.62c%20for%20c2) for analysis.
 
 If you haven't used ShowCondorIGC before, it is an excellent tool for Condor flight analysis and comparison. Much better than SeeYou (in my opinion) and worth the learning curve.
 
