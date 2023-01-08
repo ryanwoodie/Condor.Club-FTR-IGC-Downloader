@@ -5,9 +5,9 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 
 global config := 0
+msg1 :=
 loadCCDLconfig()
-SetTimer, RemoveTooltip, 5000
-
+SetTimer, ttip, 200
 
 start:
 loop
@@ -20,7 +20,7 @@ global sleeprandom := 0
 AllTracks := ""
 while (clipboard = "")
   {
-  ToolTip, Highlight`, or select all (ctrl+a)`, and copy (ctrl+c) Condor.Club Race Result rows to start download. Ctrl+i to change settings. ESC to exit
+  msg = Highlight`, or select all (ctrl+a)`, and copy (ctrl+c) Condor.Club Race Result rows to start download. Ctrl+i to change settings. ESC to exit
   sleep 100
   }
 
@@ -69,7 +69,7 @@ Loop,parse,Clipboard1,¢
    RegExMatch(A_LoopField,"^\d{4,7}",Result)
 if (Result > 1000) and (Result < 1000000)
 {
-  ToolTip,Downloading %Result%.ftr
+  msg = Downloading %Result%.ftr
   rank :=
   if(count2 > 0)
       rank := "&rank=1&next=1"
@@ -86,7 +86,7 @@ if (Result > 1000) and (Result < 1000000)
     else
       random,sleeprandom,% DownloadSleepMilliSeconds - 1000,% DownloadSleepMilliSeconds + 1000
   sec := sleeprandom/1000
-  Tooltip, Taking a %sec% second pause on downloading (to avoid getting blocked by Condor.Club)
+  msg =  Taking a %sec% second pause on downloading (to avoid getting blocked by Condor.Club)
   sleep %sleeprandom%
   unzip()
   time := A_Now
@@ -105,7 +105,7 @@ if (Result > 1000) and (Result < 1000000)
     else
       run, explorer.exe "%IGCandFTRFolder%"
     }
-ToolTip, CC FTR & IGC Downloader will exit in 10 seconds. Hit Ctrl+r to keep it running or ESC to exit now.
+msg =  CC FTR & IGC Downloader will exit in 10 seconds. Hit Ctrl+r to keep it running or ESC to exit now.
 sleep 10000
 ExitApp
 }
@@ -300,21 +300,26 @@ if (SCIexe="")
   if (errorlevel = 0)
   IniWrite %SCIexe%, CCDLconfig.ini,Settings,SCIexe
   }
+while WinExist("ShowCondorIGC")
+  {
+  WinActivate, ShowCondorIGC
+  msgbox, Please close any previous instances of ShowCondorIGC and then hit OK to continue.
+  }
 run, %SCIexe%
 tt = ShowCondorIGC
 WinWait, %tt%
 IfWinNotActive, %tt%,, WinActivate, %tt%
-
 WinMenuSelectItem, ShowCondorIGC,,Favorites
 WinWait, Favorites
 IfWinNotActive, Favorites,, WinActivate, Favorites
 ControlFocus,Load Folder (IGC),Favorites
 ControlSend, Load Folder (IGC),{enter},Favorites
+msg = Next select the type of task (and min time if AAT task). After you select and hit OK, please wait up to 10 seconds for tracks to load.
 WinWaitClose,Task
 WinWait,Open
-sleep 50
+sleep 100
 ControlSetText,Edit1,%scifile%,Open
-sleep 50
+sleep 100
 ControlSend,Edit1,{enter},Open
 Return
 }
@@ -332,9 +337,19 @@ GetDownloadPath() {
 }
 
 RemoveTooltip:
-  ToolTip
-  settimer,RemoveTooltip,off
+  msg := ""
   return
+
+ttip:
+  if (msg1=msg)
+  ToolTip, %msg%
+  else
+  {
+  SetTimer, RemoveTooltip, 10000
+  msg1 := msg
+  }
+  return
+
 
 ESC::
 exitapp
