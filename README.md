@@ -11,4 +11,4 @@ If you haven't used ShowCondorIGC before, it is an excellent tool for Condor fli
 
 **Important**: You must select the correct download folder during setup (the one your default web-browser uses) for this tool to work.
 
-Note that this tool requires a subscription to Condor.Club, [7-Zip](https://www.7-zip.org/download.html) and the [CoFliCo](https://condorutill.fr/) track converter. If you are running this program for the first time, you will be taken through setup and file/folder selection steps. You can update your settings in the future with Ctrl+i, or by deleting the CCDLconfig.ini file.
+Note that this tool requires a subscription to Condor.Club, and that you have [7-Zip](https://www.7-zip.org/download.html) and the [CoFliCo](https://condorutill.fr/) track converter on your computer. If you are running this program for the first time, you will be taken through setup and file/folder selection steps. You can update your settings in the future with Ctrl+i, or by deleting the CCDLconfig.ini file.
