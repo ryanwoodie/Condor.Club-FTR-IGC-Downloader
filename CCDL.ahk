@@ -7,20 +7,22 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 global config := 0
 msg1 :=
 loadCCDLconfig()
-SetTimer, ttip, 200
+SetTimer, ttip, 500
 
 start:
 loop
 {
 clipboard := ""
 longpause := 0
+longerpause := 0
 global time := A_now
 global time2 := ""
 global sleeprandom := 0
+dlcount := 0
 AllTracks := ""
 while (clipboard = "")
   {
-  msg = Highlight`, or select all (ctrl+a)`, and copy (ctrl+c) Condor.Club Race Result rows to start download. Ctrl+i to change settings. ESC to exit
+  msg = Highlight`, or select all (ctrl+a)`, and copy (ctrl+c) Condor.Club Race Results/Best Performances page rows to start download.`nCtrl+i to change settings.`nESC to exit
   sleep 100
   }
 
@@ -42,7 +44,7 @@ Clipboard2 := RegExReplace(Data,"http\S*analysis\S*rank=", "¢",count2)
 Clipboard1 := Clipboard1 . Clipboard2
 if  (count < 1) and (count2 < 1)
  {
- MsgBox, 4,, A track was not found in copied data. Click "yes" and try again, or click "no" to exit app. If you copied the Condor URL, try to select all (Ctrl+a) and copy (ctrl+c) on the results page instead.
+ MsgBox, 4,, A track was not found in copied data. Are you signed into Condor.Club? The last column of the table with the little square icon must be copied when selecting rows. Or just select all (Ctrl+a) and copy (ctrl+c) to get all tracks on a race results/best performances page.`n`nClick "yes" and try again, or click "no" to exit app.
  IfMsgBox Yes
    goto start
    else
@@ -53,7 +55,11 @@ If (Count2 = 0)
   count2 := ""
 if (Count = 0)
   count := ""
-MsgBox, 4,, Ready to download %count%%count2% tracks. Would you also like to copy the FTRs to your Condor FlightTrack folder (eg. to use as ghosts)?
+if (count > 80) or (count2 > 80)
+  longwarning := "There will be a long 5 minute pause after downloading 80 tracks to try to avoid getting blocked by Condor.Club. "
+else
+  longwarning := ""
+MsgBox, 4,, Ready to download %count%%count2% tracks. %longwarning%`n`nWould you also like to copy the FTRs to your Condor FlightTrack folder (ie. to use as ghosts)?
 IfMsgBox Yes
    global CopyFTR := 1
   else
@@ -73,22 +79,55 @@ if (Result > 1000) and (Result < 1000000)
   rank :=
   if(count2 > 0)
       rank := "&rank=1&next=1"
-  WinGetActiveTitle, OutputVar
+  ; WinGetActiveTitle, OutputVar
   download_url := "https://www.condor.club/download2/0/?res=" . Result . Rank
   runwait, %download_url%,,HIDE
-  sleep 500
-  WinActivate, %OutputVar%
+  dlcount++
+  WinWait,Save As,,1,
+  if (errorlevel = 0)
+    {
+      if (dlcount = 1)
+        {
+        winactivate,Save As
+        sleep 50
+        ControlGetText, dlfile , Edit1, Save As
+        sleep 50
+        ControlSetText , Edit1, %DownloadFolder%, Save As
+        sleep 50
+        ControlSend,Edit1,{enter}
+        sleep 50
+        ControlSetText , Edit1, %dlfile%, Save As
+        msg = You must save the file this folder (%DownloadFolder%).
+        }
+      else
+        {
+        winactivate,Save As
+        sleep 50
+        ControlSend,Edit1,{enter}
+        }
+      WinWaitClose,Save As
+    }
+  ; WinActivate, %OutputVar%
+
   if (longpause++ = 20)
     {
       random,sleeprandom,30000,120000
       longpause := 0
+    if (longerpause = 80)
+     {
+      sleeprandom := 300000
+      longerpause := 0
+     }
     }
     else
       random,sleeprandom,% DownloadSleepMilliSeconds - 1000,% DownloadSleepMilliSeconds + 1000
-  sec := sleeprandom/1000
-  msg =  Taking a %sec% second pause on downloading (to avoid getting blocked by Condor.Club)
+  longerpause++
+  sec := round(sleeprandom/1000)
+  sleeprandom :=   sleeprandom/2
+  msg = Taking a %sec% second pause on downloading (to avoid getting blocked by Condor.Club)
   sleep %sleeprandom%
   unzip()
+  sleep %sleeprandom%
   time := A_Now
  }
  }
@@ -100,7 +139,7 @@ if (Result > 1000) and (Result < 1000000)
      LaunchSCI()
   else
     {
-    if (SaveToSubfolder=1)
+    if (SaveToSubfolder="Yes")
       run, explorer.exe "%IGCandFTRFolder%\%task%"
     else
       run, explorer.exe "%IGCandFTRFolder%"
@@ -118,9 +157,9 @@ StartTime := A_TickCount
 while (wait=0)
 {
 ElapsedTime := A_TickCount - StartTime
-if (ElapsedTime > 20000)
+if (ElapsedTime > 10000)
     {
-     msgbox, If a track has finished downloading, but you get this message, please make sure that the folder that the tracks are being downloaded to is the same folder that is in the CCDLconfig.ini file, or delete CCDLconfig.ini to allow the setup to run again.
+     msgbox, It's been 10 seconds since attempting to download from Condor.Club`, and the zip file hasn't shown up yet in %DownloadFolder%. Here are some things to check:`n`nIf you get a "Task Not Found" message, please reload the Condor.Club results page (make sure you are logged in) and restart this tool.`n`nYou must save files to %DownloadFolder%. If a track has finished downloading`, but you get this message, please make sure that the folder that the ZIP files are being saved to is %DownloadFolder%., or press ctrl+i to change which folder this tool watches for downloads (and restart this tool afterwards).`n`nIf you have your browser set to ask where to save every file (not recommended)`, and you just need more time`, close this message to resume processing after saving the file.
      StartTime := A_TickCount
    }
 local Files
@@ -131,6 +170,7 @@ Loop, Files, %DownloadFolder%\*.zip
     {
     Wait:=1
     time2 := A_Now
+    ; msgbox filename %A_LoopFileName%
     Runwait, %7zip% x "%DownloadFolder%\%A_LoopFileName%" -o%IGCandFTRFolder% -y,,hide
     RegExMatch(A_LoopFileName,"(.*)(?=-.*-.*zip)",task)
     FileDelete, %DownloadFolder%\%A_LoopFileName%
@@ -209,7 +249,7 @@ global
 IniRead,FirstRun,CCDLconfig.ini,Settings,FirstRun,%A_space%
 if (FirstRun!="no") or (config=1)
 {
-MsgBox, 4,Condor.Club FTR & IGC Downloader,To download all available IGC and FTR files from a Condor.Club "race results" page, you can either copy (Ctrl+C) the page URL or highlight rows in the race results table and copy (Ctrl+C) to download only the selected rows.`n`nThe IGC and FTR files will be saved to the folder specified in the CCDLconfig.ini file. You will also be given the option to save the FTR files to your Condor FlightTracks folder (for use as ghosts) and to load the IGC files in ShowCondorIGC for analysis.`n`nNote that this tool requires 7-Zip and the CoFliCo track converter (available at https://condorutill.fr/). If you are running this program for the first time, you will be taken through setup and file/folder selection steps. You can update your settings in the future by deleting the CCDLconfig.ini file.`n`nWould you like to display this message again the next time the program runs?
+MsgBox, 4,Condor.Club FTR & IGC Downloader,To download all available IGC and FTR files from a Condor.Club "race results" or "best performances" page, select all (Ctrl+A) and copy (Ctrl+C) for full results OR highlight race results rows with your mouse and Ctrl+c to download only those results.`n`nAfter downloading the temporary ZIP files from Condor.Club, IGC and FTR files will be extracted to a folder that you choose, and are optionally organized automatically into subfolders for each task. You will also be given the option to copy the FTR files to your Condor FlightTracks folder (for use as ghosts) and to load the IGC files in ShowCondorIGC for analysis.`n`nNote that this tool requires 7-Zip and the CoFliCo track converter (available at https://condorutill.fr/). If you are running this program for the first time, you will be taken through setup and file/folder selection steps. You can update your settings in the future by pressing ctrl+i.`n`nWould you like to display this message again the next time the program runs?
 
 IfMsgBox Yes
     IniWrite Yes,CCDLconfig.ini, Settings, FirstRun
@@ -224,7 +264,7 @@ IniRead,DownloadFolder,CCDLconfig.ini,Settings,DownloadFolder,%A_space%
   if (DownloadFolder="") or (config = 1)
   {
   DLdefault :=  GetDownloadPath()
-  FileSelectFolder, Folder,*%DLdefault%,,Select the folder where your default web-browser downloads files. IMPORTANT: This tool will not work if you do not choose the same folder that your web-browser downloads to.
+  FileSelectFolder, Folder,*%DLdefault%,,Select folder that FTR zip files download to. IMPORTANT: Choose your browser's default download folder, unless your browser is set to ask where to save each file before downloading. Zip files will be deleted after downloading.
   if (errorlevel = 0)
   IniWrite %Folder%, CCDLconfig.ini,Settings, DownloadFolder
   }
@@ -232,7 +272,7 @@ IniRead,DownloadFolder,CCDLconfig.ini,Settings,DownloadFolder,%A_space%
 IniRead,IGCandFTRFolder,CCDLconfig.ini,Settings,IGCandFTRFolder,%A_space%
   if (IGCandFTRFolder="")  or (config = 1)
   {
-  FileSelectFolder, Folder2,,1,Select folder to save IGC and FTR files to.
+  FileSelectFolder, Folder2,,1,Select folder that IGC and FTR files will be extracted to and stored in.
   if (errorlevel = 0)
   IniWrite %Folder2%, CCDLconfig.ini,Settings, IGCandFTRFolder
   }
@@ -240,7 +280,7 @@ IniRead,IGCandFTRFolder,CCDLconfig.ini,Settings,IGCandFTRFolder,%A_space%
 IniRead,SaveToSubfolder,CCDLconfig.ini,Settings,SaveToSubfolder,%A_space%
   if (SaveToSubfolder="")  or (config = 1)
   {
-  MsgBox, 4,, Would you like FTR and IGC files from the same race/task to be put into a new subfolder in %Folder2% that is named after the task? (Recommended)
+  MsgBox, 4,, Would you like FTR and IGC files to be organized into subfolders per each task? (Recommended)
   IfMsgBox Yes
       IniWrite Yes,CCDLconfig.ini, Settings, SaveToSubfolder
   else
@@ -345,7 +385,7 @@ ttip:
   ToolTip, %msg%
   else
   {
-  SetTimer, RemoveTooltip, 10000
+  ; SetTimer, RemoveTooltip, 10000
   msg1 := msg
   }
   return
