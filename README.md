@@ -15,7 +15,7 @@ Here are the steps for using:
 
 You will need subscription Condor.Club to download more than 5 tracks a month.
 
-Note, there is a chance you or your IP address could get blocked from Condor.Club for 24 hours. I only got blocked when downloading from large task with 90+ tracks, and have added an (untested) 5 minute delay when it hits 80 tracks because of this.
+Note, there is a chance your account or your IP address could get blocked from Condor.Club for 24 hours. I only got blocked when downloading from large task with 90+ tracks, and have added an (untested) 5 minute delay when it hits 80 tracks because of this.
 
 # ShowCondorIgc terminology:
 - mCR: average climb rate in m/s
