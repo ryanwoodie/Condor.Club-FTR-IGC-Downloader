@@ -1,5 +1,5 @@
 # Condor.Club FTR & IGC Downloader
-A small utility to simplify downloading multiple IGC and FTR tracks from Condor.Club
+A small utility to simplify downloading multiple IGC and FTR tracks from Condor.Club.
 
 Here are the steps for using:
 - Download [here](https://github.com/ryanwoodie/Condor.Club-FTR-IGC-Downloader/releases), or copy the AutoHotKey file above.
