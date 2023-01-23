@@ -16,3 +16,13 @@ Here are the steps for using:
 You will need subscription Condor.Club to download more than 5 tracks a month.
 
 Note, there is a chance you or your IP address could get blocked from Condor.Club for 24 hours. I only got blocked when downloading from large task with 90+ tracks, and have added an (untested) 5 minute delay when it hits 80 tracks because of this.
+
+# ShowCondorIgc terminology:
+mCR: climb rate in m/s
+mGN: mean gliding number (gliding number without influence of wind)
+mIAS: mean indicated airspeed
+nLift: number of thermals
+DeltaGN: additional gliding number (difference between mGN and GN expected from the polar)
+Vmet: average of rising and sinking air (difference between actual sink rate vs. expected sink rate from polar)
+AltLift: average climbed in a lift
+Detour: Detour in percent, only gliding passages are considered
