@@ -13,4 +13,6 @@ Here are the steps for using:
 
 *If you haven't used ShowCondorIGC before, it is an excellent tool for Condor flight analysis and comparison. Much better than SeeYou (in my opinion) and worth the learning curve.
 
-Note, you will need subscription Condor.Club to download more than 5 tracks a month.
+You will need subscription Condor.Club to download more than 5 tracks a month.
+
+Note, there is a chance you or your IP address could get blocked from Condor.Club for 24 hours. I only got blocked when downloading from large task with 90+ tracks, and have added an (untested) 5 minute delay when it hits 80 tracks because of this.
