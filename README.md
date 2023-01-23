@@ -9,7 +9,7 @@ Here are the steps for using:
 - Run Condor.Club FTR & IGC Downloader. On the first run, it will have some configuration steps to locate the files and folders it requires. **Important**: This tool uses your default web browser to download the files, so make sure to pick the folder where your web browser normally downloads files (especially if you disabled per-file save as per above step)
 - Login into Condor.Club and go to any task's "race results" or "best performances" page. Hit ctrl+a (select all) then ctrl+c (copy) to download all tracks on that page. Alternately, highlight with your mouse only the rows/tracks you want (the little chart icons ![](https://www.condor.club/i/graph2.gif) in the last column are what need to be highlighted to be exact), then hit ctrl+c. This tool will download (and later delete) the ZIP file, extract its FTR file, create an IGC copy, rename them to more detailed filenames, and save them in a subfolder named after the task. Optionally, it will also put a copy of the FTR files in your Condor FlightTracks folder for use as ghosts.
 - After it finishes downloading, you will have to option to open all the tracks in ShowCondorIgc.
-- Ctrl + I or edit the CCDLconfig.ini file to change settings.
+- Ctrl + i or edit the CCDLconfig.ini file to change settings.
 
 *If you haven't used ShowCondorIGC before, it is an excellent tool for Condor flight analysis and comparison. Much better than SeeYou (in my opinion) and worth the learning curve.
 
