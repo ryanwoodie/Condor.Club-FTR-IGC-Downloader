@@ -73,7 +73,7 @@ Loop,parse,Clipboard1,¢
  {
    Global Result
    RegExMatch(A_LoopField,"^\d{4,7}",Result)
-if (Result > 1000) and (Result < 1000000)
+if (Result > 1000) and (Result < 10000000)
 {
   msg = Downloading %Result%.ftr
   rank :=
